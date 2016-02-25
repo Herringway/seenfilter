@@ -1,0 +1,6 @@
+{
+  "name": "seenfilter",
+  "description": "Records and skips items in ranges based on various ids.",
+  "copyright": "Copyright © 2016, Cameron",
+  "authors": ["Cameron"]
+}
