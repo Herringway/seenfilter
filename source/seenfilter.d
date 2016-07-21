@@ -68,9 +68,6 @@ unittest {
 	struct TestFunction {
 		bool yes;
 		ID[] ids() {
-			std.stdio.writeln("eh");
-			if (yes)
-				std.stdio.writeln("yep");
 			return [ID("t", "a")];
 		}
 	}
