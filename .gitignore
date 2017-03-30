@@ -7,3 +7,4 @@ __dummy.html
 *.dll
 dub.selections.json
 *.exe
+*.a
