@@ -14,13 +14,13 @@ auto seenFilter(AutoAdd autoAdd, T, U)(T data, U inStorage) if (isInputRange!T &
 	static struct SeenFilter {
 		T range;
 		U storage;
-		bool empty() {
+		bool empty()() {
 			return range.empty;
 		}
-		auto ref front() {
+		auto ref front()() {
 			return range.front;
 		}
-		void popFront() {
+		void popFront()() {
 			do {
 				static if (autoAdd == AutoAdd.yes)
 					foreach (id; range.front.allIDs.filter!(x => (x.db !in storage) || !storage[x.db].canFind(x.id)))
@@ -28,7 +28,7 @@ auto seenFilter(AutoAdd autoAdd, T, U)(T data, U inStorage) if (isInputRange!T &
 				range.popFront();
 			} while (!range.empty && range.front.allIDs.seenBefore(storage));
 		}
-		this(T inRange, U inStorage) {
+		this()(T inRange, U inStorage) {
 			range = inRange;
 			storage = inStorage;
 			while(!range.empty && range.front.allIDs.seenBefore(storage))
@@ -56,7 +56,7 @@ template hasIDs(T) {
 	else
 		enum hasIDs = false;
 }
-unittest {
+@safe pure nothrow unittest {
 	string[][string] storage;
 	struct TestData {
 		ID id;
@@ -66,9 +66,14 @@ unittest {
 		ID[] ids;
 	}
 	struct TestFunction {
+		string id;
 		bool yes;
-		ID[] ids() {
-			return [ID("t", "a")];
+		ID[] ids() nothrow @safe pure {
+			auto output = [ID("t", id)];
+			if (yes) {
+				output ~= ID("t", "b");
+			}
+			return output;
 		}
 	}
 	static assert(hasIDs!TestFunction);
@@ -89,4 +94,13 @@ unittest {
 
 	foreach (testDatum; testData)
 		assert(testDatum.b == "hello");
+
+	auto storage3 = storage.init;
+	auto testData3 = [TestFunction("1"), TestFunction("b")];
+	uint count;
+	foreach (ref t; testData3.seenFilter!(AutoAdd.yes)(storage3)) {
+		t.yes = true;
+		count++;
+	}
+	assert(count == 1);
 }
